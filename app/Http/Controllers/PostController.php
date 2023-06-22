@@ -30,7 +30,11 @@ class PostController extends Controller
      */
     public function store(PostStoreRequest $request)
     {
-        Post::create($request->validated());
+        $data = $request->validated();
+        $data['year'] = auth()->user()->id;
+        
+        Post::create($data);
+
         return redirect()->route('posts.index');
     }
 
@@ -39,12 +43,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        $yearsPast = $this->getYearsPast($post->year);
+        $getYearsPast = fn (int $year) => now()->year - $year;
+        $yearsPast = $getYearsPast($post->year);
+        
         return view('posts.show', compact('post', 'yearsPast'));
-    }
-
-    private function getYearsPast(int $year): int
-    {
-        return now()->year - $year;
     }
 }
